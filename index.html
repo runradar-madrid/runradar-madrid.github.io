@@ -1,0 +1,221 @@
+<!doctype html>
+<!-- © 2026 RunRadar. Todos los derechos reservados. Prohibida su copia, modificación o distribución sin permiso. -->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>RunRadar</title>
+  <link rel="icon" type="image/png" href="icono.png">
+  <meta name="theme-color" content="#f6f5f1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icono-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="RunRadar">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="logo" href="#"><img class="logo-img" src="icono-192.png" alt="" width="28" height="28">RunRadar</a>
+      <nav class="tabs" aria-label="Secciones">
+        <button class="tab is-active" data-tab="carreras"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="15" cy="4.5" r="2"/><path d="m8 21 3-6 3 2v5M6 12l3-4 4 1 2 4 3 1M11 15l-2-3"/></svg><span>Carreras</span></button>
+        <button class="tab" data-tab="eventos"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.8Z"/></svg><span>Eventos</span></button>
+        <button class="tab" data-tab="social"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.8-.2 4.8 1.4 5.5 4.4"/></svg><span>Social</span> <span class="count cero"></span></button>
+        <button class="tab" data-tab="guardadas"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg><span>Guardadas</span> <span class="count" id="favCount">0</span></button>
+        <button class="tab" data-tab="plan"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3M8 17h6"/></svg><span>Plan</span></button>
+        <button class="tab" data-tab="perfil"><svg class="tab-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>Perfil</span></button>
+      </nav>
+      <button class="me-btn" id="meBtn" type="button" title="Tu perfil" aria-label="Tu perfil">
+        <span class="racha-mini" id="rachaMini" hidden></span>
+        <span class="avatar sm" id="meAvatar"></span>
+      </button>
+      <button class="icon-btn upd-btn" id="updBtn" type="button" title="Buscar carreras nuevas ahora" aria-label="Buscar carreras nuevas ahora">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+      </button>
+      <button class="btn add-btn" id="addBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Añadir</span>
+      </button>
+    </div>
+  </header>
+  <div class="demo-banner">Cargando…</div>
+  <main>
+    <section id="view-carreras" class="view">
+      <div class="wrap" id="hoyPlan"></div>
+      <div class="wrap top">
+        <div class="next" id="nextRace"></div>
+      </div>
+      <div class="filters">
+        <div class="wrap filters-in">
+          <div class="row">
+            <label class="search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="q" type="search" placeholder="Buscar carrera o pueblo" autocomplete="off">
+            </label>
+            <button class="filtros-btn" id="filtrosBtn" type="button" aria-expanded="false" aria-controls="masFiltros">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtros<span class="filtros-n" id="filtrosN" hidden></span>
+            </button>
+            <div class="mas-filtros" id="masFiltros">
+              <label class="field age" title="Te muestra tu categoría y el precio exacto en cada carrera">
+                <span>edad</span>
+                <input id="edad" type="number" min="0" max="99" inputmode="numeric" placeholder="—" aria-label="Tu edad">
+              </label>
+              <select id="zona" aria-label="Zona"><option value="todas">Todas las zonas</option></select>
+              <select id="mes" aria-label="Mes"><option value="todos">Cualquier mes</option></select>
+              <label class="check"><input type="checkbox" id="soloPueblo"> De pueblo</label>
+              <label class="check"><input type="checkbox" id="soloAbiertas"> Inscripción abierta</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="chips" id="distChips" role="group" aria-label="Distancia o tipo">
+              <button class="chip is-active" data-dist="todas">Todas</button>
+              <button class="chip" data-dist="5k">≤5K</button>
+              <button class="chip" data-dist="10k">10K</button>
+              <button class="chip" data-dist="media">Media</button>
+              <button class="chip" data-dist="maraton">Maratón</button>
+              <button class="chip" data-dist="trail">Trail</button>
+              <button class="chip" data-dist="cross">Cross</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wrap">
+        <div class="list-head">
+          <p id="resultCount" class="muted"></p>
+          <div class="seg" role="group" aria-label="Vista">
+            <button class="seg-btn is-active" data-vista="lista">Lista</button>
+            <button class="seg-btn" data-vista="mapa">Mapa</button>
+          </div>
+        </div>
+        <div id="lista"></div>
+        <div id="mapa" hidden></div>
+      </div>
+    </section>
+    <section id="view-eventos" class="view" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Más allá de las carreras</p>
+          <h2>Eventos <em>especiales</em></h2>
+          <p class="lead">Quedadas, retos y pruebas de zapatillas. Apúntate gratis o crea el tuyo con «Añadir».</p>
+        </div>
+        <div class="chips" id="evChips">
+          <button class="chip is-active" data-ev="todos">Todos</button>
+          <button class="chip" data-ev="quedada">Quedadas</button>
+          <button class="chip" data-ev="reto">Retos</button>
+          <button class="chip" data-ev="test">Tests</button>
+          <label class="field ev-ciudad"><select id="evCiudad" aria-label="Ciudad"><option value="todas">Todas las ciudades</option></select></label>
+        </div>
+        <div class="ev-grid" id="eventos"></div>
+      </div>
+    </section>
+    <section id="view-social" class="view" hidden>
+      <div class="wrap" id="social"></div>
+    </section>
+    <section id="view-plan" class="view" hidden>
+      <div class="wrap" id="plan"></div>
+    </section>
+    <section id="view-perfil" class="view" hidden>
+      <div class="wrap" id="perfil"></div>
+    </section>
+    <section id="view-guardadas" class="view" hidden>
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Tu calendario</p>
+          <h2>Guardadas</h2>
+        </div>
+        <div id="guardadas"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap foot muted">© 2026 RunRadar · Todos los derechos reservados · <a href="privacidad.html">Privacidad</a></footer>
+  <div id="login" class="login" hidden>
+    <form class="login-caja" novalidate>
+      <div class="logo"><img class="logo-img" src="icono-192.png" alt="" width="40" height="40">RunRadar</div>
+      <h2>Entra en RunRadar</h2>
+      <p class="login-ayuda muted">Usa tu email y tu contraseña.</p>
+      <label class="f login-email">Email<input name="email" type="email" autocomplete="username" inputmode="email" required placeholder="tu@email.com"></label>
+      <label class="f">Contraseña<input name="clave" type="password" autocomplete="current-password" required></label>
+      <label class="login-acepto" hidden><input type="checkbox" name="acepto"> Acepto la <a href="privacidad.html" target="_blank" rel="noopener">política de privacidad</a></label>
+      <p class="login-err form-err" role="alert"></p>
+      <button class="btn" type="submit">Entrar</button>
+      <button type="button" class="login-olvido">He olvidado mi contraseña</button>
+      <p class="login-cambio">¿No tienes cuenta? <button type="button" class="login-modo">Crear una</button></p>
+    </form>
+  </div>
+  <dialog id="fichaDlg" class="dlg ficha-dlg" aria-labelledby="fichaTitulo"></dialog>
+  <dialog id="perfilDlg" class="dlg" aria-labelledby="perfilDlgTitulo">
+    <form id="perfilForm" novalidate></form>
+  </dialog>
+  <dialog id="addDlg" class="dlg" aria-labelledby="dlgTitle">
+    <form id="addForm" novalidate>
+      <div class="dlg-head">
+        <h2 id="dlgTitle">Añadir</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="seg kind-seg" role="group" aria-label="Qué quieres añadir">
+        <button type="button" class="seg-btn is-active" data-kind="carreras">Carrera</button>
+        <button type="button" class="seg-btn" data-kind="eventos">Evento especial</button>
+      </div>
+      <fieldset data-for="carreras">
+        <label class="f full">Nombre*<input name="nombre" required maxlength="200" placeholder="Carrera Popular de…"></label>
+        <label class="f">Fecha*<input name="fecha" type="date" required></label>
+        <label class="f">Hora<input name="hora" type="time"></label>
+        <label class="f">Municipio*<input name="municipio" required maxlength="80" placeholder="Colmenar Viejo"></label>
+        <label class="f">Lugar<input name="lugar" maxlength="120" placeholder="Plaza Mayor"></label>
+        <label class="f">Tipo
+          <select name="tipo"><option value="asfalto">Asfalto</option><option value="trail">Trail</option><option value="cross">Cross</option></select>
+        </label>
+        <label class="f">Distancias (km)<input name="distancias" placeholder="5, 10" inputmode="decimal"></label>
+        <label class="f">Precio adulto (€)<input name="precioBase" type="number" min="0" max="500" step="0.5" placeholder="12"></label>
+        <label class="f">Edad mínima adultos<input name="edadMin" type="number" min="0" max="99" placeholder="16"></label>
+        <label class="f check full"><input name="ninos" type="checkbox"> Tiene carreras infantiles (gratis/baratas por categoría)</label>
+        <label class="f full">Web o inscripción<input name="web" type="url" maxlength="500" placeholder="https://…"></label>
+        <p class="hint full">Si ya está en la lista, se completa con tus datos.</p>
+      </fieldset>
+      <fieldset data-for="eventos" hidden>
+        <label class="f full">Título*<input name="titulo" required maxlength="200" placeholder="Reto Sub-4 en tienda"></label>
+        <label class="f">Tipo
+          <select name="tipo"><option value="reto">Reto</option><option value="quedada">Quedada</option><option value="test">Test de material</option></select>
+        </label>
+        <label class="f">Organiza<input name="organizador" maxlength="120" placeholder="Marca, tienda o club"></label>
+        <label class="f">Fecha*<input name="fecha" type="date" required></label>
+        <span class="f two">
+          <label>Desde<input name="horaInicio" type="time"></label>
+          <label>Hasta<input name="horaFin" type="time"></label>
+        </span>
+        <label class="f">Lugar*<input name="lugar" required maxlength="120" placeholder="Calle de Fuencarral 1"></label>
+        <label class="f">Municipio*<input name="municipio" required maxlength="80" value="Madrid"></label>
+        <label class="f full">Qué hay que hacer*<input name="requisito" required maxlength="300" placeholder="Corre 1 km por debajo de 4:00 en la cinta"></label>
+        <label class="f">Premio<input name="premio" maxlength="200" placeholder="Te llevas las zapatillas"></label>
+        <label class="f">Detalles<input name="extra" maxlength="300" placeholder="Ritmo 5:30, traed agua"></label>
+        <label class="f">Plazas (vacío = sin límite)<input name="cupo" type="number" min="1" max="5000" placeholder="30"></label>
+        <p class="hint full">Es público: cualquiera puede verlo y apuntarse gratis desde la app.</p>
+        <label class="f full">Web o post<input name="web" type="url" maxlength="500" placeholder="https://instagram.com/p/…"></label>
+      </fieldset>
+      <p class="form-err" id="formErr" role="alert"></p>
+      <div class="dlg-foot">
+        <button type="button" class="btn ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn" id="saveBtn">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script src="carreras.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="captura.js"></script>
+  <script src="perfil.js"></script>
+  <script src="social.js"></script>
+</body>
+</html>

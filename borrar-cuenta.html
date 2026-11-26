@@ -1,0 +1,77 @@
+<!doctype html>
+<!-- © 2026 RunRadar. Todos los derechos reservados. Prohibida su copia, modificación o distribución sin permiso. -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borrar cuenta · RunRadar</title>
+<link rel="icon" href="icono-192.png">
+<style>
+  :root { --bg: #f5f5f7; --panel: #fff; --text: #1d1d1f; --muted: #6e6e73; --accent: #1f5bff; --danger: #d70015; --line: #e5e5ea; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #000; --panel: #1c1c1e; --text: #f5f5f7; --muted: #a1a1a6; --accent: #5b8cff; --danger: #ff453a; --line: #38383a; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 520px; margin: 0 auto; padding: 32px 16px 60px; }
+  .caja { background: var(--panel); border-radius: 16px; padding: 24px; }
+  h1 { font-size: 24px; margin: 0 0 6px; } h2 { font-size: 16px; margin: 22px 0 6px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  a { color: var(--accent); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 4px; }
+  input[type=email], input[type=password] { width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); }
+  .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 14px; font-size: 14px; color: var(--text); }
+  button { margin-top: 16px; width: 100%; height: 44px; border: 0; border-radius: 999px; background: var(--danger); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  .msg { margin: 12px 0 0; font-size: 14px; } .msg.err { color: var(--danger); }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="./">← Volver a RunRadar</a></p>
+  <div class="caja">
+    <h1>Borrar tu cuenta de RunRadar</h1>
+    <p class="muted">Se borran para siempre tu cuenta y todos sus datos: perfil, foto, entrenos, marcas, plan, carreras guardadas, carreras y eventos que hayas añadido y avisos. El borrado es inmediato y no se puede deshacer. No guardamos ninguna copia.</p>
+    <h2>Desde la app</h2>
+    <p>Perfil → ⚙ Ajustes → Cuenta → <b>Borrar mi cuenta</b>.</p>
+    <h2>Desde aquí</h2>
+    <form id="f" novalidate>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required>
+      <label for="clave">Contraseña</label>
+      <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+      <label class="check"><input type="checkbox" name="seguro"> Entiendo que se borra todo y no se puede recuperar</label>
+      <button type="submit">Borrar mi cuenta para siempre</button>
+      <p class="msg" id="msg" role="alert"></p>
+    </form>
+    <p class="muted" style="margin-top:20px">¿Has olvidado la contraseña? Recupérala en la <a href="./">pantalla de entrada</a> («He olvidado mi contraseña») y vuelve aquí.</p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+  (() => {
+    const f = document.getElementById("f"), msg = document.getElementById("msg"), btn = f.querySelector("button");
+    const decir = (t, err) => { msg.textContent = t; msg.className = "msg" + (err ? " err" : ""); };
+    const CFG = self.RR_CONFIG || {};
+    const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: false } });
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const email = f.email.value.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return decir("Escribe un email válido", true);
+      if (!f.clave.value) return decir("Escribe tu contraseña", true);
+      if (!f.seguro.checked) return decir("Marca la casilla para confirmar", true);
+      btn.disabled = true; decir("Borrando…");
+      try {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password: f.clave.value });
+        if (error) throw new Error(/invalid/i.test(error.message) ? "Email o contraseña incorrectos" : error.message);
+        await sb.storage.from("fotos").remove([`${data.user.id}.jpg`]).catch(() => {});
+        const r = await sb.rpc("borrar_mi_cuenta");
+        if (r.error) throw new Error(r.error.message);
+        await sb.auth.signOut().catch(() => {});
+        f.reset();
+        decir("Tu cuenta y todos tus datos se han borrado. Gracias por usar RunRadar.");
+      } catch (x) { decir(x.message, true); btn.disabled = false; }
+    };
+  })();
+</script>
+</body>
+</html>

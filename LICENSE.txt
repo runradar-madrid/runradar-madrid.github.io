@@ -1,0 +1,12 @@
+Copyright (c) 2026 RunRadar. Todos los derechos reservados.
+
+Este software, su código fuente, su diseño, sus textos, logotipos e iconos son
+propiedad de su autor. No se concede ninguna licencia: queda prohibido copiar,
+modificar, distribuir, publicar, sublicenciar o vender todo o parte de este
+software, o crear obras derivadas de él, sin permiso previo y por escrito del autor.
+
+Que el código sea visible en el navegador o en un repositorio no implica
+ningún permiso para reutilizarlo.
+
+All rights reserved. No license is granted to use, copy, modify or distribute
+this software or any part of it without prior written permission.
